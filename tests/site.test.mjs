@@ -11,8 +11,8 @@ vm.runInContext(await readFile(new URL('saige/core.js', root), 'utf8'), context)
 const content = context.window.SAIGE_CONTENT;
 const core = context.SaigeCore;
 
-test('Saige leads the page with the approved line', () => {
-  assert.match(html, /I’m Saige\. <em>Eric and I made this together\.<\/em>/);
+test('Saige uses the approved collaborator welcome line', () => {
+  assert.match(html, /I’m Saige\. <em>Eric and I made <span class="work-title">School of Abstractions<\/span> together\.<\/em>/);
   assert.ok(html.indexOf('collab-portrait') < html.indexOf('id="process"'));
 });
 test('four narrative paths and their targets exist', () => {
@@ -78,4 +78,11 @@ test('static server serves the page but rejects private and unknown paths', asyn
     for (const p of ['/.env','/README.md','/api/saige','/missing']) assert.equal((await fetch(base+p)).status,404);
     assert.equal((await fetch(base+'/',{method:'POST'})).status,405);
   } finally { await new Promise(resolve=>server.close(resolve)); }
+});
+
+test('Saige name treatment emphasizes ai without changing the name', async () => {
+  const css = await readFile(new URL('styles.css',root),'utf8');
+  const componentCss = await readFile(new URL('saige/components.css',root),'utf8');
+  assert.match(css,/\.saige-word \.ai-accent/);
+  assert.match(componentCss,/\.saige-word \.ai-accent/);
 });
