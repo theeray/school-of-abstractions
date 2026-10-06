@@ -1,28 +1,19 @@
-# Integration status — 2026-10-05
+# Merge status — 2026-10-06
 
-## Hosting decision and deployment preparation
+The painting-first exhibition and separate Saige destination are implemented. The entry design follows the original exported exhibition structure and opening text, not the earlier Saige-first hero. The unavailable original source was reconstructed rather than misrepresented as recovered verbatim.
 
-Eric explicitly requires Firebase Hosting at `school-of-abstractions.web.app` and never wants ChatGPT Sites. This is recorded in `AGENTS.md` and the README. A Firebase-only publishing helper and failure-path tests have been added. It creates/uses the authorized project/site, applies the exact target, publishes only Hosting, and verifies the live HTML.
+Included: twenty bounded detail targets; six working tours; eight selected conversation moments; exact studio-process statement and estimate; source/reference gallery; pan, pinch, keyboard and expanded image controls; Saige's approved portrait and exact welcome; restrained `ai` accent including dynamic text; contextual written-note hand-offs.
 
-**This update is deployment preparation, not a confirmed Firebase release.** No authenticated Firebase connection was available during this repository update. Run `bash scripts/publish-firebase.sh` in Eric's signed-in Google Cloud Shell using the README instructions. Record the actual project, release and verification outcome after successful deployment. Name availability and ownership are not yet established.
+The temporary study image is 1200 pixels wide. It is deliberately not described as the approved Topaz master. Fine detail remains limited by the study image. External source-image loading has a credited-link fallback.
 
-## Design already in the repository
+Saige's nineteen-topic conversation is deterministic and local. No live generative service, microphone, audio, paid model call, private-data connector, or analytics was enabled.
 
-The artist-approved Saige-led design from `School-of-Abstractions-Saige-led-site-preview.html` is retained. The portrait, collaborator role, four narrative paths and curated conversation have been retained. The code is separated into maintainable static assets. Phone navigation, focus outlines and direct story-to-answer navigation are included.
+## Verification
 
-No API key, account export, private conversation archive, hosting credential, model request or paid service was added.
+The merge was tested locally through Node regression tests and browser rendering/interaction checks on desktop and phone layouts. Browser navigation to local URLs was prohibited in this runtime, so browser checks used the same local files in an isolated inline document. Static routing/link targets and HTTP responses were checked independently with the local server. External reference-image failures were deliberately exercised. No live model call was used in testing.
 
-## Next integration steps
+## Publication
 
-1. Recover and merge the earlier painting viewer, twenty detail targets, source-image gallery and full selected-dialogue timeline. Preserve the Saige-first navigation. Use explicitly labelled study imagery until Eric approves the final master.
-2. Add the final Topaz painting and generate its image pyramid; verify each target against the actual final composition.
-3. Review the public knowledge notes and Saige's first-person answer style. Keep new narration separate from exact conversation excerpts. Add Steve Sundahl's approved quote when supplied.
-4. Connect a server-side agent only after authentication, rate limits, a durable global usage cap, retention disclosures and failure handling have been reviewed. Never put a provider key in a web page or repository.
-5. Design and approve the spoken voice and microphone consent separately. No audio feature is implemented in this design commit. Firebase's current preview configuration disables microphone and camera access.
-6. Complete the authenticated Firebase publication and verify the actual public URL. A GitHub source update alone is not evidence of a live deployment.
+The owner had already successfully deployed the preceding version to the correct Firebase site. This merge is not a confirmed release until the signed-in deployment helper succeeds and verifies both pages and the asset bytes. No Firebase authentication is present in the build session. `scripts/redeploy.sh` pins the already-created project and site; it will not create projects or touch billing. Record the actual redeploy result after it runs in the authenticated Cloud Shell.
 
-## Future endpoint interface retained by the component
-
-Only a same-origin `endpoint` attribute can activate the connection hook. No attribute is present in the current page. A status response at `<endpoint>/status` must explicitly report `aiConfigured: true`; consent is requested before sending the first question. The page never requests or stores a provider API key.
-
-The previous server proof of concept is not activated or represented as production-ready here. A future implementation must be tested against its current provider documentation and the approved privacy and usage constraints.
+Remaining editorial work: approved Topaz web master, final hotspot calibration against it, and Steve Sundahl's supplied statement. AI conversation and audio are separate future features.

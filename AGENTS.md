@@ -1,19 +1,25 @@
 # Project instructions
 
-## Hosting preference — explicitly requested by Eric, 2026-10-05
+## Hosting: Firebase only
 
-Eric's standing preference is **never to use ChatGPT Sites** for his websites.
-For this project, use **Firebase Hosting only** at `school-of-abstractions.web.app`.
-Keep the source in `theeray/school-of-abstractions`.
+Eric never wants ChatGPT Sites or a substitute hosting provider. Use the existing Firebase project `project-6c1d195b-969f-4318-8f2`, Hosting site `school-of-abstractions`, and public URL `https://school-of-abstractions.web.app`. Do not create projects, switch accounts, link/unlink billing, or alter other applications when publishing this site.
 
-Do not create, publish, update, or recommend a ChatGPT Sites deployment as an alternative. Do not substitute GitHub Pages or another provider without Eric's explicit approval. If Firebase authentication is unavailable, state that limitation and use the documented Google Cloud Shell publishing procedure; do not silently change hosts.
+The owner successfully published the preceding version from Cloud Shell. That is not evidence that a later commit is live. A release must complete and its public pages and assets must be verified. The authenticated publishing entry point is `bash scripts/redeploy.sh`; the older `publish-firebase.sh` delegates to it.
 
-A source commit, preview file, or Firebase configuration is not a live deployment. Report the site as published only after the Firebase release succeeds and the public page is verified. Do not delete historical deployments without explicit authorization.
+## Current design decision — October 6, 2026
 
-## Design and safety boundaries
+The painting-first exhibition is the home page. Saige is a separate navigation destination at `saige.html`, entered deliberately after exploring the artwork. This supersedes the earlier Saige-first landing-page direction.
 
-Keep Saige as the prominent public voice of the AI collaborator, not an exhibition-guide add-on. Preserve the approved portrait, first-person voice, exact quotations, and distinction between estimated time and logged hours.
+Preserve the exhibition title, calm cream/green identity, and approved green portrait. Every visible Saige name receives a restrained warm accent on the letters `ai`. Preserve the exact welcome: `I’m Saige. Eric and I made School of Abstractions together.` The second sentence is italicized.
 
-The current site uses curated written responses. Do not claim live generative conversation or audio is active. Do not activate paid APIs, link billing, expose credentials, or connect private conversations/accounts as part of a static-site publishing task.
+Keep twenty painting detail targets, six thematic routes, selected dialogue excerpts, process writing, and source/reference notes. The displayed artwork is a temporary study, not the approved final Topaz web master. Never fabricate missing pixels or call an enlargement a source of additional detail.
 
-Run `npm test` before publishing. `bash scripts/publish-firebase.sh` pins the exact Hosting site and verifies the live HTML. Keep permissions and credentials out of `public/` and Git history.
+Saige remains the public persona for the AI collaborator, not a generic guide and not a claim of persistent human-like consciousness. Exact quoted excerpts, new narration, artist interpretations, and historical sources remain distinguishable.
+
+## Safety and editorial boundaries
+
+This release uses curated written answers. No live model, speech synthesis, microphone, paid API, analytics, or private-data connector is enabled. Do not claim otherwise. Keep endpoint credentials and private project records out of public code and Git history. Do not activate additional services as part of static redeployment.
+
+The forty-hour time figure is a retrospective estimate, not a time log. Steve Sundahl's account of the TAD logo is still pending. Visual resemblance is not confirmation of his influences.
+
+Run `npm test` before deployment. Review both desktop and phone layouts, touch zoom, separate-page navigation, exact welcome, and name styling after changes.

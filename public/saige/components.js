@@ -7,14 +7,7 @@
  const avatar=assets.avatar || (rootURL ? new URL('avatar.webp',rootURL).href : './saige/avatar.webp');
  const C=window.SAIGE_CONTENT;
  if(!C || !globalThis.SaigeCore) { console.error('Saige: load content.js and core.js before components.js.'); return; }
- function appendStyledText(node,text){
-   const parts=String(text).split(/(Saige)/g);
-   for(const part of parts){
-    if(part==='Saige'){const word=document.createElement('span');word.className='saige-word';word.append('S');const ai=document.createElement('span');ai.className='ai-accent';ai.textContent='ai';word.append(ai,'ge');node.append(word);}
-    else node.append(document.createTextNode(part));
-   }
-  }
-  function el(tag,cls,text){ const n=document.createElement(tag); if(cls)n.className=cls; if(text!==undefined)appendStyledText(n,text); return n; }
+ function el(tag,cls,text){ const n=document.createElement(tag); if(cls)n.className=cls; if(text!==undefined)n.textContent=text; return n; }
  function styles(shadow){
   if(assets.cssText){const s=el('style');s.textContent=assets.cssText;shadow.append(s);}
   else {const l=el('link');l.rel='stylesheet';l.href=rootURL ? new URL('components.css',rootURL).href : './saige/components.css';shadow.append(l);}
@@ -87,10 +80,16 @@
   open(){if(!this.hasAttribute('inline')&&!this.dialog.open)this.dialog.showModal();this.launcher.setAttribute('aria-expanded','true');this.input.focus();}
   close(){if(!this.hasAttribute('inline'))this.dialog.close();}
   reset(){this.epoch++;this.abort?.abort();this.abort=null;this.messages=[];this.previousId=null;this.pending=null;this.consented=false;this.consent.hidden=true;this.input.value='';this.submit.disabled=false;this.input.disabled=false;this.welcome();this.input.focus();}
-  welcome(){this.log.replaceChildren();this.addMessage('assistant',(this.aiReady?'I’m Saige. Eric and I made School of Abstractions together. We did it through a long exchange of ideas, generations, rejections, corrections, research, and Photoshop revisions. I’m the public voice we’ve given to the AI side of that collaboration. Ask me about something in the painting, or about what happened between us while we made it. I’ll ask before sending your first question to the AI service.':'I’m Saige. Eric and I made School of Abstractions together. We did it through a long exchange of ideas, generations, rejections, corrections, research, and Photoshop revisions. I’m the public voice we’ve given to the AI side of that collaboration. Ask me about something in the painting, or about what happened between us while we made it. In this preview my answers are assembled from the documented project record; live AI is not connected.'),[],null,null,false);this.showTopics(C.starters);}
+  welcome(){
+   this.log.replaceChildren();
+   this.addMessage('assistant','I’m Saige. Eric and I made School of Abstractions together.\n\nI’m the public voice we’ve given to the AI side of that collaboration. Ask about something in the painting or about the ideas, revisions, and disagreements that shaped it. '+(this.aiReady?'I’ll ask before sending your first question to the AI service.':'My answers here come from curated project notes; live AI and spoken audio are not connected.'),[],null,null,false);
+   const body=this.log.querySelector('.body');
+   if(body){const text=body.textContent, phrase='Eric and I made School of Abstractions together.', start=text.indexOf(phrase);body.replaceChildren(document.createTextNode(text.slice(0,start)));const em=el('em',null,phrase);body.append(em,document.createTextNode(text.slice(start+phrase.length)));}
+   this.showTopics(C.starters);
+  }
   showTopics(topics){const box=el('div','starters');for(const t of topics){const b=el('button','starter',t.label);b.type='button';b.addEventListener('click',()=>this.ask(t.label,t.id));box.append(b);}this.log.append(box);}
   addMessage(role,answer,sourceIds=[],quoteId=null,noteId=null,record=true){
-   const article=el('article','message '+(role==='user'?'user':'assistant'));const byline=el('div','byline');if(role!=='user'){const a=el('img');a.src=avatar;a.alt='';byline.append(a);}byline.append(role==='user'?document.createTextNode('You'):(()=>{const n=el('span');appendStyledText(n,'Saige');return n;})());article.append(byline,el('div','body',answer));
+   const article=el('article','message '+(role==='user'?'user':'assistant'));const byline=el('div','byline');if(role!=='user'){const a=el('img');a.src=avatar;a.alt='';byline.append(a);}byline.append(document.createTextNode(role==='user'?'You':'Saige'));article.append(byline,el('div','body',answer));
    const q=C.quotes[quoteId];if(q){article.append(el('blockquote',null,q.text),el('p','quote-credit',q.attribution+'. '+q.note));}
    const details=sourceDetails(sourceIds);if(details)article.append(details);
    if(noteId&&!this.aiReady)article.append(el('div','topic-tag','Written note: '+(C.notes.find(n=>n.id===noteId)?.title||noteId)));
@@ -120,7 +119,7 @@
     if(epoch!==this.epoch)return;
     if(out.mode!=='ai'||typeof out.answer!=='string')throw new Error('invalid_response');
     this.previousId=out.noteId||null;this.addMessage('assistant',out.answer,out.sourceIds,out.quoteId,out.noteId);this.moreTopics();
-   }catch(e){if(epoch!==this.epoch)return;const limit=/limit|budget/.test(e.message);this.addMessage('assistant',limit?'Saige’s AI request limit has been reached. You can still use the documented dialogue; no automatic retry will be made.':'The AI connection is unavailable. I haven’t received an AI answer. You can use the documented dialogue instead.',[],null,null,false);const b=el('button','starter','Switch to the documented dialogue');b.addEventListener('click',()=>{this.aiReady=false;this.setMode();this.ask(message,forcedId);b.remove();});this.log.append(b);
+   }catch(e){if(epoch!==this.epoch)return;const limit=/limit|budget/.test(e.message);this.addMessage('assistant',limit?'Saige’s AI request limit has been reached. You can still use the documented dialogue; no extra request was sent.':'The AI connection is unavailable. I haven’t received an AI answer. You can use the documented dialogue instead.',[],null,null,false);const b=el('button','starter','Switch to the documented dialogue');b.addEventListener('click',()=>{this.aiReady=false;this.setMode();this.ask(message,forcedId);b.remove();});this.log.append(b);
    }finally{clearTimeout(timeout);busy.remove();if(epoch===this.epoch){this.submit.disabled=false;this.input.disabled=false;this.abort=null;this.log.scrollTop=this.log.scrollHeight;}}
   }
   moreTopics(){const b=el('button','topics-toggle','Browse all exhibition topics');b.type='button';b.addEventListener('click',()=>{b.remove();this.showTopics(C.notes.map(n=>({label:n.title,id:n.id})));this.log.scrollTop=this.log.scrollHeight;});this.log.append(b);}

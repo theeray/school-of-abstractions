@@ -1,92 +1,76 @@
 # The School of Abstractions
 
-**Saige is the public voice of the AI collaborator, not a museum-guide add-on.**
+A painting-first exhibition by Eric R. Carlson, with **Saige in a separate collaborator section**.
 
-This is the approved Saige-centered design for Eric R. Carlson's *The School of Abstractions*: a prominent portrait and first-person welcome, four narrative paths, the Pollock–Mondrian realization, the studio-process statement, and a central written conversation interface.
+**Home:** https://school-of-abstractions.web.app  
+**Saige:** https://school-of-abstractions.web.app/saige.html  
+**Hosting:** Firebase only. Never use ChatGPT Sites.
 
-## Hosting requirement
+## This merge
 
-**Firebase Hosting only, at `school-of-abstractions.web.app`. Never use ChatGPT Sites.** Eric explicitly requested this preference on October 5, 2026. It is also recorded in `AGENTS.md` for future work. Do not substitute another hosting provider without approval.
+- Painting-first home with the original exhibition title, introductory text, navigation structure, and approved Saige portrait used in the shared identity.
+- Twenty selectable details; pinch/drag/keyboard zoom, fit, pins, expanded view, and contextual reading panels.
+- Six thematic tours with next/previous stops; eight concise selected dialogue moments; process statement and retrospective time estimate; source notes and credited reference-image links.
+- Separate `saige.html` retaining the collaborator voice, exact welcome, four narrative routes, and nineteen curated written-response topics.
+- A subtle copper accent on the `ai` in every visible Saige name, including dynamic conversation text.
+- Deep links from painting details to the matching Saige note, and links back into the artwork.
 
-Source code being committed is not proof of a live deployment. The Firebase site must be created/verified in the authorized Google account before it can be published.
+The initial website's complete source archive could not be recovered. This merges a reconstructed painting-first exhibition, grounded in its exported text and approved project material, with the approved collaborator component. It is not claimed to be a byte-for-byte restoration of the original source or CSS.
 
-## Run
+## Run and test
 
-Node.js 22 or newer; no third-party runtime packages and no API key required.
+Node.js 22+; no runtime package install or API key needed.
 
 ```sh
 npm start
-# Open http://127.0.0.1:4173
+# http://127.0.0.1:4173
 npm test
 npm run build
 ```
 
-`npm run build` copies only the public website to `dist/`. It does not deploy anything. Firebase Hosting serves `public/` directly.
+`public/` contains the complete static website. Build copies it to `dist/` without deploying.
 
-## Publish to Firebase
+The temporary painting is a compressed 1200-pixel AVIF study. The portrait is the approved WebP asset. Museum/gallery reference photographs load from credited external sources, with a link fallback when loading fails. No image is presented as the final approved high-resolution Topaz master.
 
-Open the normal [Google Cloud Shell](https://shell.cloud.google.com), sign in with the Google account used for Firebase, and approve Google authorization if prompted. Use the normal shell rather than an automatic non-Google repository link: those links may start an isolated environment without account credentials.
+## Publish the already-created site
 
-Paste this block; it clones the latest source into a new directory without modifying any existing checkout:
+Use the owner's signed-in Google Cloud Shell. The established project is `project-6c1d195b-969f-4318-8f2`; the site is `school-of-abstractions`. The script never provisions another project or touches billing.
 
-```sh
-workdir="$(mktemp -d "$HOME/saige-publish.XXXXXX")" &&
-git clone https://github.com/theeray/school-of-abstractions.git "$workdir" &&
-cd "$workdir" &&
-bash scripts/publish-firebase.sh
-```
-
-The script runs the tests, verifies Firebase access, creates the `school-of-abstractions` project and Hosting site if absent and available, applies the exact Hosting target, publishes only that site, then compares the public HTML to the local page. It does not link billing or enable live AI, audio, databases, or functions. Missing authorization, creation errors, occupied names, failed tests, or failed verification stop the process rather than switching hosts or claiming success.
-
-If the correct authorized Firebase project has a different ID, set it explicitly while keeping the required public hostname:
+From the checkout used for the previous successful publication:
 
 ```sh
-FIREBASE_PROJECT_ID=YOUR_EXISTING_PROJECT_ID bash scripts/publish-firebase.sh
+cd ~/saige-publish.cpSRbp &&
+git pull --ff-only &&
+bash scripts/redeploy.sh
 ```
 
-Do not invent a replacement hostname if the requested site ID is unavailable. Resolve the project/site ownership first. The script uses a preinstalled Firebase CLI when available, otherwise `npx --yes firebase-tools@latest`. It requires Bash, Node.js 22+, npm, and curl. The target mapping is stored locally in `.firebaserc` only after authenticated setup; no project ownership is inferred from a public URL or a configuration file.
+The helper runs the tests, verifies that the expected Hosting site exists in the selected project, applies its local target mapping, deploys only that Hosting site, and compares both published pages and all local runtime assets with the source files. `.firebaserc` is deliberately local/ignored so pulling the repository does not overwrite the owner's existing untracked target map.
 
-Success is the final line `Published and verified: https://school-of-abstractions.web.app`. The deployment helper's tests mock Firebase and the web request; passing tests is not evidence of a real deployment.
+No live release is implied by a source commit. Success ends with:
 
-Official references:
-- https://firebase.google.com/docs/cli
-- https://firebase.google.com/docs/hosting/multisites
-- https://docs.cloud.google.com/shell/docs/open-in-cloud-shell
+```text
+Published and verified: https://school-of-abstractions.web.app
+Saige section: https://school-of-abstractions.web.app/saige.html
+```
 
-## What works now
-
-- Saige's approved portrait, collaborator-first introduction and mobile-friendly narrative layout.
-- Four paths: **Look with me**, **How we changed each other**, **How we made it**, and **Ask me yourself**.
-- The exact artist-supplied process quotation and approximately 40 hours, explicitly identified as a retrospective estimate.
-- Nineteen curated written-note topics, source notes, starter questions, follow-up topic selection and clear-conversation controls.
-- Story buttons that lead into Saige's relevant written answer.
-
-## What is not connected
-
-**This is a design and written-note preview, not a live generative or speaking agent.** There is no microphone input, synthesized audio, paid API call, server-side agent, or deployment credential in this repository. The `saige-guide` component retains a future same-origin endpoint hook with a consent step, but the page does not enable it.
-
-The earlier twenty-point painting viewer, full reference gallery and full dialogue timeline have not yet been merged into this architecture. The approved painting master and its deep-zoom assets remain a separate integration step; no placeholder is presented as the final artwork.
+Official deployment reference: https://firebase.google.com/docs/hosting/multisites
 
 ## Edit
 
-| File | Purpose |
-| --- | --- |
-| `public/index.html` | First-person narrative, section order, quotations and navigation |
-| `public/styles.css` | Site layout and responsive styling |
-| `public/site.js` | Story-to-conversation actions |
-| `public/saige/avatar.webp` | Approved Saige illustration, reused without redesign |
-| `public/saige/content.js` | Curated public notes, approved quotations and source metadata |
-| `public/saige/core.js` | Deterministic written-note retrieval; not a language model |
-| `public/saige/components.js` | Conversation and studio-process web components |
-| `public/saige/components.css` | Component styling inside shadow roots |
-| `scripts/publish-firebase.sh` | Authenticated Firebase-only publishing and page verification |
-| `AGENTS.md` | Owner's hosting preference and project instructions |
-| `docs/STATUS.md` | Remaining integration and publishing work |
+- `public/index.html`: exhibition home and original opening text.
+- `public/exhibition-data.js`: twenty details, six tours, eight dialogue moments, credited references and sources.
+- `public/exhibition.js`: image navigation, reading panels, tours and source rendering.
+- `public/styles.css`: shared identity and responsive layout.
+- `public/saige.html`: separate collaborator section and exact welcome.
+- `public/saige-page.js`: allow-listed painting-to-conversation context.
+- `public/branding.js`: safe visible-name accent in ordinary and shadow DOM.
+- `public/saige/`: approved portrait, public notes, deterministic response matching and components.
+- `scripts/redeploy.sh`: pinned existing-project deployment and verification.
 
-The approved self-contained preview has been split into editable files. Mobile navigation and focus styles were improved; repeated portrait data was replaced with one local image. There are no CDN dependencies, analytics, browser storage, or private account connectors.
+## Not activated
 
-## Attribution and editorial boundaries
+Saige has curated **written responses**, not a live generative connection or speaking voice. No microphone, audio synthesis, API calls, tracking, browser-persistent chat history, or private account connection is enabled. The future same-origin endpoint hook remains dormant without an endpoint attribute and positive status check. A generated AI response would require a separately reviewed server, consent, abuse/rate controls, and budget constraints.
 
-Saige is a persona for the AI role in the documented collaboration, not a claim of one continuously conscious individual behind every model response. The expanded explanation remains available without dominating the introduction. Historical claims and the artist's interpretations stay distinct. The Sundahl quotation and confirmation of the TAD logo's actual influences are still pending; visual resemblance is not proof of influence.
+Steve Sundahl's quote is pending. The logo's Bauhaus / De Stijl connections remain interpretive, not confirmed influence. Exact dialogue and new exhibition prose are labelled separately. The time estimate does not claim a measured activity log.
 
-Artwork, avatar and artist-supplied material are included for this project. No open-source or third-party image license is asserted by this repository. Review rights before reuse outside the exhibition.
+Artwork and portrait are supplied for this project. No blanket open-source or third-party image license is asserted.

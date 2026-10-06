@@ -4,6 +4,7 @@ dist/
 .env.*
 !.env.example
 .firebase/
+.firebaserc
 *.log
 .DS_Store
 playwright-report/

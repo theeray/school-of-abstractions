@@ -5,4 +5,7 @@
 @media(max-width:620px){.process{padding:25px 22px;border-radius:16px}.process h2{font-size:39px}.process blockquote{font-size:23px;padding-left:17px}.hours{grid-template-columns:83px 1fr;gap:14px}.number{font-size:50px}.hours p{font-size:14px}.panel:not(.inline){width:100vw;height:100dvh;inset:0;border-radius:0;border:0}.panel.inline{height:680px;max-height:none;border-radius:16px}.header{padding:16px}.messages{padding:18px 16px}.header img{width:76px;height:76px;border-radius:20px}.name{font-size:29px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 
-.saige-word .ai-accent{color:#a87542}
+/* Match the exhibition branding while preserving the collaborator's portrait. */
+:host{--ink:#21382d;--muted:#59675d;--green:#304c3a;--paper:#fdfbf6;--soft:#e8ede3;--line:#d6d9ce;--accent:#975d32}
+.process{border-radius:4px}.panel,.panel.inline{border-radius:5px}.header{background:#f1f2e9}.header img{border-radius:50%}.message .body em{font-family:Georgia,serif;font-size:1.13em;line-height:1.5}.saige-word .ai-accent{color:#975d32}.launcher .ai-accent{color:#f1c185}.byline .saige-word{text-transform:none;letter-spacing:0;font-size:12px}
+@media(max-width:540px){.panel.inline{height:720px;max-height:calc(100dvh - 145px);min-height:560px}.header{gap:12px;padding:17px}.header img{width:62px;height:62px}.name{font-size:29px}.subtitle{font-size:9px}.process{padding:25px 20px}.process h2{font-size:36px}.process .hours{grid-template-columns:80px 1fr}}
