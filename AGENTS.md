@@ -20,6 +20,6 @@ Saige remains the public persona for the AI collaborator, not a generic guide an
 
 This release uses curated written answers. No live model, speech synthesis, microphone, paid API, analytics, or private-data connector is enabled. Do not claim otherwise. Keep endpoint credentials and private project records out of public code and Git history. Do not activate additional services as part of static redeployment.
 
-The forty-hour time figure is a retrospective estimate, not a time log. Steve Sundahl's account of the TAD logo is still pending. Visual resemblance is not confirmation of his influences.
+The forty-hour time figure is a retrospective estimate, not a time log. Steve Sundahl’s statement was supplied on October 10, 2026. Preserve his exact quotation and its distinction between Vienna Secession as the primary inspiration and Bauhaus primary colors as another inspiration. De Stijl affinities and the tree-to-droplets comparison are exhibition interpretations. The monogram sheet is from the 1902 XIV exhibition catalogue; do not label it as a Ver Sacrum page or assert that every journal contribution used a monogram.
 
 Run `npm test` before deployment. Review both desktop and phone layouts, touch zoom, separate-page navigation, exact welcome, and name styling after changes.

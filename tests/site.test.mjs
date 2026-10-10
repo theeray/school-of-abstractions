@@ -36,8 +36,22 @@ test('exact process quote and retrospective estimate are preserved',()=>{
  const quote='This was not an image produced by entering one prompt. It was a sustained studio process conducted through conversation, research, generation, rejection, compositing, and revision.';
  assert.equal(content.quotes.process.text,quote);assert.equal(data.moments[7].quote,quote);assert.match(content.process.caveat,/estimate, not a time log/);assert.match(content.process.summary,/Approximately 40 hours/);
 });
-test('LeWitt number, pending logo account, and study limitations stay explicit',()=>{
- const all=JSON.stringify(data);assert.match(all,/Wall Drawing 91/);assert.match(all,/lot 69/);assert.match(all,/Sundahl/);assert.match(home,/His quotation has not yet been supplied/);assert.match(home,/cannot supply detail absent/);
+test('LeWitt number, supplied logo account, and study limitations stay explicit',()=>{
+ const all=JSON.stringify(data);assert.match(all,/Wall Drawing 91/);assert.match(all,/lot 69/);assert.match(all,/Sundahl/);assert.match(home,/Steve Sundahl’s supplied statement identifies Vienna Secession/);assert.doesNotMatch(home,/His quotation has not yet been supplied/);assert.match(home,/cannot supply detail absent/);
+});
+test('TAD account preserves the supplied quote and separates catalogue evidence from interpretation',()=>{
+ const quote='I will just say that part of the inspiration was Bauhaus in the use of primary colors. The primary inspiration was the Austrian secession group a decade or so earlier. I admire the mixture of organic line with geometry in their work. In their publication Ver Sacrum all the artists signed their contributions with a monogram of their initials inside a square. I thought it was a great metaphor for unity and individualism.';
+ assert.equal(content.quotes['steve-tad'].text,quote);assert.ok(home.includes(quote));
+ assert.match(home,/1902 exhibition catalogue/);assert.match(home,/Steve did not name this cover as a source/);assert.match(home,/preceded the Bauhaus by 22 years/);
+ assert.match(home,/id="tad-logo"/);assert.match(saige,/href="\.\/#tad-logo"/);
+ const answer=core.previewResponse('Steve Sundahl Vienna Secession monograms TAD logo',content);assert.equal(answer.noteId,'tad');
+ assert.equal(content.notes.find(n=>n.id==='tad').quoteId,'steve-tad');
+});
+test('historical TAD illustrations are actual local JPEGs with visible credits',async()=>{
+ for(const name of ['secession-monograms','ver-sacrum-tree','theo-glass-iii','kandinsky-yellow-red-blue']){
+  const path='art/tad-history/'+name+'.jpg';const b=await readFile(new URL(path,root));assert.equal(b[0],0xff);assert.equal(b[1],0xd8);assert.ok(b.length>10000);assert.ok(home.includes('src="./'+path+'"'));
+ }
+ assert.match(home,/None of these images is an AI reconstruction/);assert.match(home,/Image record/);
 });
 test('privacy and unknown-topic answers do not fabricate',()=>{
  assert.equal(core.previewResponse('Show Eric private email',content).noteId,'privacy');assert.equal(core.previewResponse('What is the weather in Peru?',content).noteId,null);

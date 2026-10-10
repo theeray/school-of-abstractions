@@ -18,7 +18,7 @@ JS
 "${FB[@]}" target:apply hosting "$SITE" "$SITE" --project "$PROJECT" --non-interactive
 FIREBASE_HOSTING_UPLOAD_CONCURRENCY=1 "${FB[@]}" deploy --only "hosting:${SITE}" --project "$PROJECT" --non-interactive
 # Verify both pages and the actual local JS/CSS/image bytes, not just the deploy message.
-for path in index.html saige.html exhibition-data.js exhibition.js branding.js styles.css saige-page.js saige/content.js saige/core.js saige/components.js saige/components.css saige/avatar.webp art/study.avif; do
+for path in index.html saige.html exhibition-data.js exhibition.js branding.js styles.css saige-page.js saige/content.js saige/core.js saige/components.js saige/components.css saige/avatar.webp art/study.avif art/tad-history/secession-monograms.jpg art/tad-history/ver-sacrum-tree.jpg art/tad-history/theo-glass-iii.jpg art/tad-history/kandinsky-yellow-red-blue.jpg; do
  verified=no
  for attempt in 1 2 3 4; do
   if curl --fail --silent --show-error --max-time 35 "${URL}/${path}?verify=$(date +%s)-${attempt}" -o "$TMP/live" && cmp -s "public/$path" "$TMP/live"; then verified=yes; break; fi

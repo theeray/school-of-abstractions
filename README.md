@@ -10,6 +10,7 @@ A painting-first exhibition by Eric R. Carlson, with **Saige in a separate colla
 
 - Painting-first home with the original exhibition title, introductory text, navigation structure, and approved Saige portrait used in the shared identity.
 - Twenty selectable details; pinch/drag/keyboard zoom, fit, pins, expanded view, and contextual reading panels.
+- An illustrated TAD Logo section: exact Steve Sundahl statement, square monograms, Ver Sacrum tree cover, Theo’s glass, Kandinsky, and sourced historical connections.
 - Six thematic tours with next/previous stops; eight concise selected dialogue moments; process statement and retrospective time estimate; source notes and credited reference-image links.
 - Separate `saige.html` retaining the collaborator voice, exact welcome, four narrative routes, and nineteen curated written-response topics.
 - A subtle copper accent on the `ai` in every visible Saige name, including dynamic conversation text.
@@ -71,6 +72,6 @@ Official deployment reference: https://firebase.google.com/docs/hosting/multisit
 
 Saige has curated **written responses**, not a live generative connection or speaking voice. No microphone, audio synthesis, API calls, tracking, browser-persistent chat history, or private account connection is enabled. The future same-origin endpoint hook remains dormant without an endpoint attribute and positive status check. A generated AI response would require a separately reviewed server, consent, abuse/rate controls, and budget constraints.
 
-Steve Sundahl's quote is pending. The logo's Bauhaus / De Stijl connections remain interpretive, not confirmed influence. Exact dialogue and new exhibition prose are labelled separately. The time estimate does not claim a measured activity log.
+Steve Sundahl’s supplied statement and the illustrated TAD Logo section identify his Vienna Secession and Bauhaus inspirations. De Stijl and the tree-to-droplets comparison are distinguished as exhibition interpretations. Exact dialogue and new exhibition prose are labelled separately. The time estimate does not claim a measured activity log.
 
 Artwork and portrait are supplied for this project. No blanket open-source or third-party image license is asserted.

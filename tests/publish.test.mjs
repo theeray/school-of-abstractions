@@ -8,8 +8,8 @@ const source=new URL('../scripts/redeploy.sh',import.meta.url);
 function run(flags={}){
  const dir=mkdtempSync(join(tmpdir(),'soa-redeploy-'));
  try{
-  for(const p of ['scripts','public','public/art','public/saige','bin'])mkdirSync(join(dir,p));copyFileSync(source,join(dir,'scripts/redeploy.sh'));
-  for(const name of ['index.html','saige.html','exhibition-data.js','exhibition.js','branding.js','styles.css','saige-page.js','saige/content.js','saige/core.js','saige/components.js','saige/components.css','saige/avatar.webp','art/study.avif'])writeFileSync(join(dir,'public',name),'fixture '+name);
+  for(const p of ['scripts','public','public/art','public/art/tad-history','public/saige','bin'])mkdirSync(join(dir,p));copyFileSync(source,join(dir,'scripts/redeploy.sh'));
+  for(const name of ['index.html','saige.html','exhibition-data.js','exhibition.js','branding.js','styles.css','saige-page.js','saige/content.js','saige/core.js','saige/components.js','saige/components.css','saige/avatar.webp','art/study.avif','art/tad-history/secession-monograms.jpg','art/tad-history/ver-sacrum-tree.jpg','art/tad-history/theo-glass-iii.jpg','art/tad-history/kandinsky-yellow-red-blue.jpg'])writeFileSync(join(dir,'public',name),'fixture '+name);
   const executable=(name,text)=>writeFileSync(join(dir,'bin',name),text,{mode:0o755});
   executable('npm','#!/bin/sh\necho tests >> "$CALLS"\nexit "${FAIL_TESTS:-0}"\n');
   executable('sleep','#!/bin/sh\nexit 0\n');
@@ -29,7 +29,7 @@ const fs=require('node:fs'),a=process.argv.slice(2),e=process.env;const url=a.fi
  }finally{rmSync(dir,{recursive:true,force:true});}
 }
 test('redeploy uses only the exact established Firebase project and site',()=>{const r=run();assert.equal(r.status,0,r.stderr);assert.match(r.calls,/deploy --only hosting:school-of-abstractions --project project-6c1d195b-969f-4318-8f2/);assert.doesNotMatch(r.calls,/projects:create|sites:create|billing|functions/);assert.match(r.stdout,/Published and verified/);});
-test('both pages and all local runtime assets are verified after deployment',()=>{const r=run();assert.equal(r.status,0,r.stderr);assert.equal((r.calls.match(/^verify /gm)||[]).length,13);assert.match(r.calls,/verify saige.html/);assert.match(r.calls,/verify art\/study.avif/);});
+test('both pages and all local runtime assets are verified after deployment',()=>{const r=run();assert.equal(r.status,0,r.stderr);assert.equal((r.calls.match(/^verify /gm)||[]).length,17);assert.match(r.calls,/verify saige.html/);assert.match(r.calls,/verify art\/study.avif/);assert.match(r.calls,/verify art\/tad-history\/secession-monograms.jpg/);});
 for(const [name,flags]of Object.entries({'failed tests':{FAIL_TESTS:'1'},'missing authentication':{FAIL_AUTH:'1'},'malformed site list':{BAD_JSON:'1'},'missing expected site':{MISSING_SITE:'1'},'failed local target mapping':{FAIL_MAPPING:'1'}}))test(name+' stops before deployment',()=>{const r=run(flags);assert.notEqual(r.status,0);assert.doesNotMatch(r.calls,/^deploy /m);assert.doesNotMatch(r.stdout,/Published and verified/);});
 test('deployment failure never reports success',()=>{const r=run({FAIL_DEPLOY:'1'});assert.notEqual(r.status,0);assert.doesNotMatch(r.stdout,/Published and verified/);});
 test('mismatched home page never reports a verified release',()=>{const r=run({BAD_PAGE:'1'});assert.notEqual(r.status,0);assert.doesNotMatch(r.stdout,/Published and verified/);});
