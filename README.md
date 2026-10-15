@@ -11,6 +11,7 @@ A painting-first exhibition by Eric R. Carlson, with **Saige in a separate colla
 - Painting-first home with the original exhibition title, introductory text, navigation structure, and approved Saige portrait used in the shared identity.
 - Twenty selectable details; pinch/drag/keyboard zoom, fit, pins, expanded view, and contextual reading panels.
 - An illustrated TAD Logo section: exact Steve Sundahl statement, square monograms, Ver Sacrum tree cover, Theo’s glass, Kandinsky, and sourced historical connections.
+- A gods section distinguishing Raphael’s Apollo/Athena program from Eric’s Apollo/Dionysus substitution, with Nietzsche’s account of artistic impulses and linked painting details.
 - Six thematic tours with next/previous stops; eight concise selected dialogue moments; process statement and retrospective time estimate; source notes and credited reference-image links.
 - Separate `saige.html` retaining the collaborator voice, exact welcome, four narrative routes, and nineteen curated written-response topics.
 - A subtle copper accent on the `ai` in every visible Saige name, including dynamic conversation text.

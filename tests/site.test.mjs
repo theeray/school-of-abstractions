@@ -53,6 +53,28 @@ test('historical TAD illustrations are actual local JPEGs with visible credits',
  }
  assert.match(home,/None of these images is an AI reconstruction/);assert.match(home,/Image record/);
 });
+test('gods section distinguishes Raphael’s program, Nietzsche, and the artist’s substitution',()=>{
+ assert.match(home,/id="gods" aria-labelledby="gods-title"/);assert.match(home,/id="gods-title"/);
+ assert.match(home,/href="\.\/#gods"/);assert.match(saige,/href="\.\/#gods"/);
+ assert.match(home,/Athena.*Minerva/);assert.match(home,/not a recovered statement of Raphael’s private intentions/);
+ assert.match(home,/Eric replaces Athena with Dionysus/);assert.match(home,/The Birth of Tragedy<\/em> \(1872\)/);
+ assert.match(home,/centuries after Raphael’s fresco/);assert.match(home,/more than reason against chaos/);
+ assert.match(home,/does not claim that Mondrian or Pollock adopted Nietzsche’s categories/);
+ assert.match(home,/href="#detail=apollo"/);assert.match(home,/href="#detail=dionysus"/);
+});
+test('god details and Saige route to sourced, consistent readings',async()=>{
+ for(const id of ['apollo','dionysus']){
+  const d=data.details.find(d=>d.id===id);assert.ok(d.sourceIds.includes('nietzsche-tragedy'));assert.ok(d.sourceIds.includes('raphael-gods'));
+ }
+ for(const question of ['Why did Eric replace Athena?','Nietzsche Apollonian Dionysian','Why these gods?']){
+  const answer=core.previewResponse(question,content);assert.equal(answer.noteId,'marks');assert.match(answer.answer,/Athena with Dionysus/);
+ }
+ assert.ok(content.notes.find(n=>n.id==='marks').sourceIds.includes('nietzsche-tragedy'));
+ const js=await readFile(new URL('exhibition.js',root),'utf8');assert.match(js,/Why the gods changed →/);
+});
+test('private duende discussion is not added to public exhibition content',()=>{
+ assert.doesNotMatch(home+saige+JSON.stringify(data)+JSON.stringify(content),/duende|García Lorca|Myth America/i);
+});
 test('privacy and unknown-topic answers do not fabricate',()=>{
  assert.equal(core.previewResponse('Show Eric private email',content).noteId,'privacy');assert.equal(core.previewResponse('What is the weather in Peru?',content).noteId,null);
 });

@@ -1,4 +1,10 @@
-# Project status — 2026-10-10
+# Project status — 2026-10-15
+
+## Gods section update — October 15
+
+Added a “The gods” section to the exhibition and both navigation menus. It distinguishes Raphael’s Apollo/Athena pairing and the Room of the Segnatura program from Eric’s deliberate Apollo/Dionysus substitution. Nietzsche’s 1872 framework is identified as a later philosophical reading, not Raphael’s intention or a documented allegiance of Mondrian and Pollock. The interpretation emphasizes interplay rather than a reason/chaos split. God and Raphael detail panels link to the section; Saige’s existing marks note is consistent with it. All twenty hotspots, six tours, eight excerpts, nineteen notes, Steve’s exact statement, and the supplied images remain intact.
+
+Verification: 41 Node checks, static build, and diff checks pass. Browser QA was not available in this managed session; no preview server or alternative browser-control method was started. Firebase credentials are absent, and the established Cloud Shell URL displays “Site Unavailable” in the connected browser. Publication must not be claimed without a successful authenticated release and asset verification. Use the existing `bash scripts/redeploy.sh` entry point; no alternate host or cloud resources were created.
 
 The painting-first exhibition and separate Saige destination are implemented. The entry design follows the original exported exhibition structure and opening text, not the earlier Saige-first hero. The unavailable original source was reconstructed rather than misrepresented as recovered verbatim.
 
