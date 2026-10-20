@@ -1,0 +1,156 @@
+name: Publish School of Abstractions
+run-name: "School of Abstractions — ${{ inputs.operation }}"
+
+# Manual only until the first complete release is verified.
+# No push/release/pull-request trigger: saving code or uploading media cannot publish.
+# Public configuration identifiers are not passwords or private keys.
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: "check = validate files only; publish = update the live Firebase site"
+        required: true
+        type: choice
+        default: check
+        options:
+          - check
+          - publish
+
+permissions:
+  contents: read
+
+concurrency:
+  group: soa-firebase-production
+  cancel-in-progress: false
+
+jobs:
+  prepare-and-publish:
+    name: Prepare release (publish only when selected)
+    if: >-
+      github.repository_id == '1406463958' &&
+      github.repository_owner_id == '10244675' &&
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'workflow_dispatch' &&
+      (inputs.operation == 'check' || inputs.operation == 'publish')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      CI: 'true'
+      FIREBASE_PROJECT_ID: project-6c1d195b-969f-4318-8f2
+
+    steps:
+      - name: Check out the selected main commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      - name: Test the media installer
+        shell: bash
+        run: python3 tests/media-installer.test.py
+
+      - name: Download the website media from its fixed release
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/School-of-Abstractions-HD-Update.zip"
+          url='https://github.com/theeray/school-of-abstractions/releases/download/soa-media-v1/School-of-Abstractions-HD-Update.zip'
+          if ! curl --fail --location --silent --show-error \
+            --proto '=https' --proto-redir '=https' \
+            --connect-timeout 20 --max-time 240 --retry 2 \
+            --max-filesize 64000000 --output "$archive" "$url"; then
+            echo '::error::The HD media release could not be downloaded. Publish release soa-media-v1 with the exact School-of-Abstractions-HD-Update.zip asset. No website changes were attempted.'
+            exit 1
+          fi
+          python3 scripts/install-hd-media.py "$archive"
+          python3 scripts/install-hd-media.py --check
+
+      - name: Fetch and verify the credited historical originals
+        shell: bash
+        run: python3 scripts/fetch-reference-images.py
+
+      - name: Verify local media and run the website tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/verify-hd-media.mjs --local
+          npm test
+          npm run build
+
+      - name: Check-only summary — no website changes
+        if: inputs.operation == 'check'
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo '## RELEASE FILES VERIFIED — NO WEBSITE CHANGES'
+            echo ''
+            echo 'The pinned media manifest, artwork files, and downloaded historical references passed their checks.'
+            echo 'The repository test suites and static build completed successfully.'
+            echo ''
+            echo "Commit: $GITHUB_SHA"
+            echo ''
+            echo 'This check did not authenticate to Google, upload to Firebase, or release a site.'
+            echo 'To publish, run this workflow again on main and select publish.'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # Install tooling before requesting short-lived Google credentials.
+      - name: Install the pinned Firebase CLI
+        if: inputs.operation == 'publish'
+        shell: bash
+        run: npm install --global firebase-tools@15.34.0
+
+      - name: Authenticate for the explicitly requested publication
+        if: inputs.operation == 'publish'
+        id: google-auth
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          project_id: project-6c1d195b-969f-4318-8f2
+          workload_identity_provider: projects/220231419120/locations/global/workloadIdentityPools/soa-github/providers/github-main
+          service_account: soa-github-deploy@project-6c1d195b-969f-4318-8f2.iam.gserviceaccount.com
+          create_credentials_file: true
+          export_environment_variables: true
+          cleanup_credentials: true
+
+      - name: Publish only the existing site and verify every public file
+        if: inputs.operation == 'publish'
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Credentials live outside public/ and are removed by the auth action.
+          printf '\n# Temporary Google Actions credentials\ngha-creds-*.json\n' >> .git/info/exclude
+          bash scripts/redeploy-hd.sh
+          {
+            echo '## HIGH-RESOLUTION WEBSITE PUBLISHED AND VERIFIED'
+            echo ''
+            echo 'Project: project-6c1d195b-969f-4318-8f2'
+            echo 'Site: school-of-abstractions'
+            echo 'Home: https://school-of-abstractions.web.app'
+            echo 'Saige: https://school-of-abstractions.web.app/saige.html'
+            echo "Commit: $GITHUB_SHA"
+            echo ''
+            echo 'The existing HD deploy script completed and all public files matched the local release.'
+            echo 'Automatic publishing remains off. No new project, billing change, live AI, or audio was enabled.'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Failure summary
+        if: failure()
+        shell: bash
+        run: |
+          {
+            echo '## STOPPED — NOT A VERIFIED RELEASE'
+            echo ''
+            echo 'Read the first failed step above. Do not recreate the identity provider or change billing.'
+            echo 'If the failure was before the publication step, this workflow did not change the website.'
+            echo 'If upload/release began, the site may have changed; inspect the live verification result before claiming success.'
+            echo 'Do not post credentials or the full firebase-debug.log in chat.'
+          } >> "$GITHUB_STEP_SUMMARY"
