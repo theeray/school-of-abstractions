@@ -39,9 +39,16 @@ test('exact process quote and retrospective estimate are preserved',()=>{
 test('LeWitt number, supplied logo account, and study limitations stay explicit',()=>{
  const all=JSON.stringify(data);assert.match(all,/Wall Drawing 91/);assert.match(all,/lot 69/);assert.match(all,/Sundahl/);assert.match(home,/Steve Sundahl’s supplied statement identifies Vienna Secession/);assert.doesNotMatch(home,/His quotation has not yet been supplied/);assert.match(home,/cannot supply detail absent/);
 });
-test('TAD account preserves the supplied quote and separates catalogue evidence from interpretation',()=>{
+test('TAD account preserves the original record and the approved featured excerpt',()=>{
  const quote='I will just say that part of the inspiration was Bauhaus in the use of primary colors. The primary inspiration was the Austrian secession group a decade or so earlier. I admire the mixture of organic line with geometry in their work. In their publication Ver Sacrum all the artists signed their contributions with a monogram of their initials inside a square. I thought it was a great metaphor for unity and individualism.';
- assert.equal(content.quotes['steve-tad'].text,quote);assert.ok(home.includes(quote));
+ assert.equal(content.quotes['steve-tad'].text,quote);
+ const excerpt=quote.replace(/^I will just say that /,'...');
+ const account=home.match(/<div class="logo-account">([\s\S]*?)<\/div>/)?.[1];
+ assert.ok(account,'Featured Steve quotation is present');
+ assert.ok(account.includes('<blockquote data-no-brand>“'+excerpt+'”</blockquote>'));
+ assert.ok(account.includes('Steve Sundahl · designer of the TAD logo · Statement on creative inspiration'));
+ assert.doesNotMatch(account,/I will just say that|verbatim statement/);
+ assert.match(home,/Steve’s statement is excerpted with an opening ellipsis; the remaining words are unchanged/);
  assert.match(home,/1902 exhibition catalogue/);assert.match(home,/Steve did not name this cover as a source/);assert.match(home,/preceded the Bauhaus by 22 years/);
  assert.match(home,/id="tad-logo"/);assert.match(saige,/href="\.\/#tad-logo"/);
  const answer=core.previewResponse('Steve Sundahl Vienna Secession monograms TAD logo',content);assert.equal(answer.noteId,'tad');
