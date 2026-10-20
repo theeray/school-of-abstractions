@@ -1,0 +1,134 @@
+name: Firebase connection check
+
+# Manual, read-only test. No deployment or automatic publishing is enabled here.
+# The identifiers below are configuration, not passwords or private keys.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: soa-firebase-auth-check
+  cancel-in-progress: false
+
+jobs:
+  verify-connection:
+    name: Verify Firebase access (no deployment)
+    if: >-
+      github.repository_id == '1406463958' &&
+      github.repository_owner_id == '10244675' &&
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Check out this repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Authenticate to Google without a private key
+        id: google-auth
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          project_id: project-6c1d195b-969f-4318-8f2
+          workload_identity_provider: projects/220231419120/locations/global/workloadIdentityPools/soa-github/providers/github-main
+          service_account: soa-github-deploy@project-6c1d195b-969f-4318-8f2.iam.gserviceaccount.com
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/firebase.hosting.readonly
+          access_token_lifetime: 300s
+          create_credentials_file: false
+          export_environment_variables: false
+
+      - name: Read and verify the existing Hosting site
+        shell: bash
+        env:
+          FIREBASE_READ_TOKEN: ${{ steps.google-auth.outputs.access_token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import http.client
+          import json
+          import os
+          import re
+          import sys
+
+          project = "project-6c1d195b-969f-4318-8f2"
+          project_number = "220231419120"
+          site = "school-of-abstractions"
+          expected_url = "https://school-of-abstractions.web.app"
+          token = os.environ.pop("FIREBASE_READ_TOKEN", "")
+          if not token:
+              sys.exit("::error::Google authentication did not return an access token.")
+
+          # HTTPS GET only. No redirects, writes, CLI deployments, or media uploads.
+          connection = http.client.HTTPSConnection("firebasehosting.googleapis.com", timeout=30)
+          try:
+              connection.request(
+                  "GET",
+                  f"/v1beta1/projects/{project_number}/sites/{site}",
+                  headers={"Authorization": "Bearer " + token, "Accept": "application/json"},
+              )
+              response = connection.getresponse()
+              status = response.status
+              raw = response.read(1_048_577)
+          except Exception:
+              # Do not include request headers or credentials in exception output.
+              sys.exit("::error::The read-only Hosting request could not complete. No deployment was attempted.")
+          finally:
+              connection.close()
+              token = ""
+
+          if len(raw) > 1_048_576:
+              sys.exit("::error::Unexpectedly large Hosting response. No deployment was attempted.")
+          try:
+              data = json.loads(raw)
+          except (ValueError, UnicodeError):
+              sys.exit(f"::error::Hosting returned an unreadable response (HTTP {status}).")
+          if not isinstance(data, dict):
+              sys.exit("::error::Unexpected Hosting response format.")
+          if status != 200:
+              # Only return safe status/reason identifiers, never a raw error dump.
+              error = data.get("error", {})
+              if not isinstance(error, dict):
+                  error = {}
+              codes = []
+              value = error.get("status")
+              if isinstance(value, str) and re.fullmatch(r"[A-Z_]{3,80}", value):
+                  codes.append(value)
+              details = error.get("details", [])
+              if isinstance(details, list):
+                  for detail in details:
+                      value = detail.get("reason") if isinstance(detail, dict) else None
+                      if isinstance(value, str) and re.fullmatch(r"[A-Z_]{3,80}", value):
+                          codes.append(value)
+              label = ", ".join(dict.fromkeys(codes)) or "NO_REASON_CODE"
+              sys.exit(f"::error::Hosting read failed: HTTP {status}, {label}. No deployment was attempted.")
+
+          expected_names = {
+              f"projects/{project_number}/sites/{site}",
+              f"projects/{project}/sites/{site}",
+          }
+          if data.get("name") not in expected_names or data.get("defaultUrl") != expected_url:
+              sys.exit("::error::The response did not match the intended project and Hosting site.")
+
+          message = (
+              "FIREBASE CONNECTION VERIFIED - NO WEBSITE CHANGES\n"
+              f"Project: {project}\n"
+              f"Site: {site}\n"
+              f"URL: {expected_url}\n"
+              "GitHub authenticated through the configured Google identity provider and read the intended site.\n"
+              "Deployment permissions, artwork availability, and publishing are not tested by this check.\n"
+          )
+          print(message)
+          summary = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary:
+              with open(summary, "a", encoding="utf-8") as stream:
+                  stream.write("## Firebase connection verified\n\n" + message)
+          PY
