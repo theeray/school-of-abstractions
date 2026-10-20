@@ -32,3 +32,15 @@
  }
  window.SaigeBrand={apply:walk};observe(document.body);
 })();
+
+/* Shared media upgrade: load after the original deferred exhibition scripts. */
+(function(){
+ 'use strict';
+ const here=document.currentScript?.src;
+ if(!here)return;
+ const root=new URL('.',here);
+ const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('artwork-media.css',root).href;document.head.append(style);
+ const script=document.createElement('script');script.src=new URL('artwork-media.js',root).href;script.defer=true;
+ script.onerror=()=>console.warn('The media upgrade could not load. The existing exhibition remains available.');
+ document.head.append(script);
+})();
