@@ -1,3 +1,57 @@
+/* Card crops are independent of painting hotspots. Coordinates are normalized
+ * source-image positions; thumbWidth is the visible fraction of image width.
+ * These crops refer to the current study composition, not a new/generated face. */
+(function(global){
+ 'use strict';
+ const crop=(kind,x,y,width,alignY=.5,fit='cover')=>Object.freeze({
+  kind,thumbPoint:Object.freeze([x,y]),thumbWidth:width,
+  thumbAlign:Object.freeze([.5,alignY]),thumbFit:fit
+ });
+ const crops=Object.freeze({
+  mondrian: crop('portrait',.401,.220,.155,.46),
+  pollock: crop('portrait',.579,.244,.170,.44),
+  krasner: crop('portrait',.479,.466,.175,.46),
+  sobel: crop('portrait',.756,.571,.205,.44),
+  martin: crop('portrait',.358,.465,.160,.46),
+  hilma: crop('portrait',.495,.376,.075,.44),
+  theo: crop('portrait',.279,.346,.160,.44),
+  euclid: crop('portrait',.266,.598,.200,.48),
+  mandelbrot: crop('portrait',.649,.494,.180,.44),
+  lewitt: crop('object',.862,.464,.225),
+  apollo: crop('portrait',.239,.128,.180,.44),
+  dionysus: crop('portrait',.756,.130,.180,.44),
+  tad: crop('object',.220,.573,.800),
+  t: crop('object',.115,.537,.270),
+  a: crop('object',.344,.355,.275),
+  d: crop('object',.302,.813,.275),
+  equations: crop('object',.112,.259,.115),
+  droplets: crop('object',.543,.365,.250),
+  marks: crop('object',.813,.815,.250),
+  raphael: crop('overview',.5,.5,1,.5,'contain')
+ });
+ const fallback=crop('object',.5,.5,1);
+ const clamp=(value,min,max)=>Math.min(max,Math.max(min,value));
+ function layout(boxWidth,boxHeight,imageWidth,imageHeight,spec=fallback){
+  // Hidden/zero-sized cards wait for the next ResizeObserver notification.
+  if(![boxWidth,boxHeight,imageWidth,imageHeight].every(n=>Number.isFinite(n)&&n>0))return null;
+  const p=spec.thumbPoint,a=spec.thumbAlign||[.5,.5];
+  if(!p||p.length!==2||!p.every(n=>Number.isFinite(n)&&n>=0&&n<=1)||
+   !Number.isFinite(spec.thumbWidth)||spec.thumbWidth<=0||spec.thumbWidth>1||
+   a.length!==2||!a.every(n=>Number.isFinite(n)&&n>=0&&n<=1))return null;
+  if(spec.thumbFit==='contain'){
+   const scale=Math.min(boxWidth/imageWidth,boxHeight/imageHeight);
+   return{width:imageWidth*scale,height:imageHeight*scale,x:(boxWidth-imageWidth*scale)/2,y:(boxHeight-imageHeight*scale)/2};
+  }
+  const scale=Math.max(boxWidth/(imageWidth*spec.thumbWidth),boxHeight/imageHeight);
+  const width=imageWidth*scale,height=imageHeight*scale;
+  // Position the source point at the desired CARD anchor, not at the same
+  // percentage of the overflowing background (CSS percentages are not crops).
+  return{width,height,x:clamp(boxWidth*a[0]-width*p[0],boxWidth-width,0),
+   y:clamp(boxHeight*a[1]-height*p[1],boxHeight-height,0)};
+ }
+ global.ExhibitionThumbnails=Object.freeze({crops,layout});
+})(window);
+
 /* Painting-first exhibition. Local data and images; no model/API calls. */
 (function(){
  'use strict';
@@ -10,12 +64,27 @@
  function sources(ids){const box=el('details','source-mini');const valid=[...new Set(ids||[])].filter(id=>D.sources[id]);if(!valid.length)return el('span');box.append(el('summary',null,`Source notes · ${valid.length}`));for(const id of valid)box.append(sourceItem(id));return box;}
  const state={zoom:1,cx:.5,cy:.5,pins:true,selected:null,tour:null,stop:0};
  const stage=$('painting-stage'),image=$('painting'),overlay=$('hotspots');const pinNodes=new Map();let width=0,height=0,base=1,frame=null,statusTimer=null;
+ // One observer composes all cards independently of the viewer's zoom/pins.
+ const thumbnailNodes=[];let thumbnailFrame=null;
+ function paintThumbnails(){
+  thumbnailFrame=null;
+  const iw=image.naturalWidth||1200,ih=image.naturalHeight||800;
+  const layouts=thumbnailNodes.map(({node,spec})=>({node,box:window.ExhibitionThumbnails.layout(node.clientWidth,node.clientHeight,iw,ih,spec)}));
+  for(const {node,box}of layouts){if(!box)continue;
+   node.style.backgroundSize=`${box.width}px ${box.height}px`;
+   node.style.backgroundPosition=`${box.x}px ${box.y}px`;
+  }
+ }
+ function scheduleThumbnails(){if(thumbnailFrame===null)thumbnailFrame=requestAnimationFrame(paintThumbnails);}
+ const thumbnailObserver=new ResizeObserver(scheduleThumbnails);
+ image.addEventListener('load',scheduleThumbnails);
  const minor=new Set(['tad','t','a','d','equations','droplets','raphael']);
  for(const d of D.details){
   const pin=el('button','hotspot',String(d.number));pin.type='button';pin.title=`${d.number}. ${d.name}`;pin.setAttribute('aria-label',pin.title);pin.setAttribute('aria-pressed','false');pin.dataset.minor=String(minor.has(d.id));pin.dataset.detail=d.id;pin.addEventListener('click',()=>{location.hash='detail='+d.id;});pinNodes.set(d.id,pin);overlay.append(pin);
   const ribbon=link('', '#detail='+d.id,'ribbon-item');ribbon.dataset.detail=d.id;ribbon.append(el('b',null,String(d.number).padStart(2,'0')),document.createTextNode(d.name));$('detail-ribbon').append(ribbon);
-  const a=link('', '#detail='+d.id,'detail-card');a.dataset.detail=d.id;const thumb=el('div','detail-thumb');thumb.setAttribute('aria-hidden','true');thumb.style.backgroundPosition=`${d.point[0]*100}% ${d.point[1]*100}%`;if(d.id==='raphael')thumb.style.backgroundSize='cover';const copy=el('div','detail-card-copy');copy.append(el('span','number-label',String(d.number).padStart(2,'0')),el('h3',null,d.name),el('p',null,d.subtitle));a.append(thumb,copy);$('detail-grid').append(a);
+  const a=link('', '#detail='+d.id,'detail-card');a.dataset.detail=d.id;const thumb=el('div','detail-thumb');thumb.setAttribute('aria-hidden','true');const spec=window.ExhibitionThumbnails.crops[d.id];thumb.dataset.crop=d.id;thumbnailNodes.push({node:thumb,spec});thumbnailObserver.observe(thumb);const copy=el('div','detail-card-copy');copy.append(el('span','number-label',String(d.number).padStart(2,'0')),el('h3',null,d.name),el('p',null,d.subtitle));a.append(thumb,copy);$('detail-grid').append(a);
  }
+ scheduleThumbnails();
  function metrics(){width=stage.clientWidth;height=stage.clientHeight;base=Math.min(width/(image.naturalWidth||1200),height/(image.naturalHeight||800));}
  function render(){
   frame=null;metrics();const iw=image.naturalWidth||1200,ih=image.naturalHeight||800,dw=iw*base*state.zoom,dh=ih*base*state.zoom;
