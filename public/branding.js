@@ -3,15 +3,27 @@
  'use strict';
  const CSS='.saige-word{white-space:nowrap}.saige-word .ai-accent{color:var(--saige-ai,#975d32)}.launcher .saige-word .ai-accent{color:#f1c185}';
  const observed=new WeakSet();
+ function groupInvitationLabels(root){
+  // A button's flex gap belongs between its label and arrow, never within a name.
+  const selector='.saige-invitation .button';
+  const buttons=[...(root.matches?.(selector)?[root]:[]),...(root.querySelectorAll?.(selector)||[])];
+  for(const button of buttons){
+   if(Array.from(button.children).some(child=>child.classList.contains('button-label')))continue;
+   const nodes=Array.from(button.childNodes).filter(node=>!(node.nodeType===Node.ELEMENT_NODE&&node.matches('[aria-hidden="true"]')));
+   if(!nodes.length)continue;
+   const label=document.createElement('span');label.className='button-label';
+   button.insertBefore(label,nodes[0]);nodes.forEach(node=>label.append(node));
+  }
+ }
  function mark(node){
   if(node.nodeType!==Node.TEXT_NODE||!node.nodeValue.includes('Saige'))return;
   const parent=node.parentElement;
   if(!parent||parent.closest('script,style,textarea,input,select,option,title,.saige-word,[data-no-brand],[contenteditable]'))return;
   const fragment=document.createDocumentFragment();
-  for(const part of node.nodeValue.split(/(Saige)/g)){
-   if(part!=='Saige'){fragment.append(document.createTextNode(part));continue;}
+  for(const part of node.nodeValue.split(/(Saige(?:['’]s)?)/g)){
+   if(!/^Saige(?:['’]s)?$/.test(part)){fragment.append(document.createTextNode(part));continue;}
    const span=document.createElement('span');span.className='saige-word';span.append('S');
-   const ai=document.createElement('span');ai.className='ai-accent';ai.textContent='ai';span.append(ai,'ge');fragment.append(span);
+   const ai=document.createElement('span');ai.className='ai-accent';ai.textContent='ai';span.append(ai,'ge',part.slice(5));fragment.append(span);
   }
   node.replaceWith(fragment);
  }
@@ -19,6 +31,7 @@
   if(root.nodeType===Node.TEXT_NODE){mark(root);return;}
   if(root.nodeType!==Node.ELEMENT_NODE&&root.nodeType!==Node.DOCUMENT_FRAGMENT_NODE)return;
   if(root.nodeType===Node.ELEMENT_NODE&&root.matches('script,style,textarea,input,select,title,.saige-word'))return;
+  groupInvitationLabels(root);
   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const nodes=[];
   while(walker.nextNode())nodes.push(walker.currentNode);nodes.forEach(mark);
   if(root.shadowRoot)observe(root.shadowRoot);

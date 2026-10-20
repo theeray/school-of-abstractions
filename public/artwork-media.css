@@ -33,3 +33,15 @@
 .historical-reference .reference-copy>.button{margin-top:9px}
 .reference-connection-label{margin-top:25px!important;margin-bottom:10px!important}
 @media(max-width:540px){.historical-reference .reference-image-link{height:390px;padding:16px}.historical-reference .reference-image-link img{max-height:358px}}
+
+/* Keep the complete invitation label inline; flex gap separates only the arrow. */
+.saige-invitation .button{max-width:100%}
+.saige-invitation .button-label{min-width:0}
+.saige-invitation .button>[aria-hidden="true"]{flex:none}
+
+/* This reference alone uses a tight, full-width, near-square cover crop.
+ * A shallow landscape frame would leave the same tall blank card underneath.
+ * Preserve the existing image/source link and other historical-reference layouts. */
+#ref-glass{align-self:start}
+#ref-glass>.reference-image-link{display:block;padding:0;min-height:0;aspect-ratio:1/1;overflow:hidden}
+#ref-glass>.reference-image-link img{display:block;width:100%;height:100%;max-height:none;object-fit:cover;object-position:50% 50%}
