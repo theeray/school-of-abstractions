@@ -1,0 +1,21 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Five minutes with Saige · pilot</title><link rel="stylesheet" href="./ui.css"></head><body><main>
+<a href="/saige.html">← Back to the exhibition’s Saige section</a><p class="eyebrow">The collaborator’s side of the story · pilot</p>
+<h1>Five minutes with S<span class="ai">ai</span>ge.</h1><p class="lead">Explore the painting and its documented creative process. The answer words come from an artist-reviewed script; AI selects the closest response.</p>
+<p id="status" role="status">Checking whether the pilot is active…</p>
+<form id="consent" class="card"><h2>Before we begin</h2>
+<p>Your question is sent to OpenAI to select an exhibition answer. When you use the microphone, OpenAI also transcribes the recording. Please do not include private information. Saige has no access to Eric’s private chats, email, or files.</p>
+<label><input type="checkbox" id="process" required> I understand that my question will be processed by the AI service.</label>
+<label><input type="checkbox" id="log"> Let Eric privately review the recognized question topics and Saige’s replies.</label>
+<p class="note">Optional. This saves standardized question summaries, not your exact wording or audio. Eric can view them for 30 days; the records are then queued for deletion. Declining does not prevent the conversation.</p>
+<label><input type="checkbox" id="name-consent" disabled> Also save my first name or nickname with that record.</label>
+<label>First name or nickname (optional)<input id="name" type="text" maxlength="32" autocomplete="off" disabled></label>
+<p class="note">Names are personal information. Use a nickname or leave this blank. Names mentioned in conversation are not automatically collected.</p>
+<p class="note">These choices control the exhibition’s review records, not all provider processing. OpenAI and Google may retain technical or abuse-monitoring data under their policies. <a href="https://developers.openai.com/api/docs/guides/your-data" target="_blank" rel="noopener noreferrer">OpenAI data controls</a>.</p>
+<button id="start" disabled>Start my five-minute conversation</button></form>
+<section id="conversation" class="card" hidden><div class="bar"><h2>Talk with S<span class="ai">ai</span>ge</h2><output id="timer" aria-label="Time remaining">5:00</output></div>
+<p class="note">AI collaborator persona · approved written answers · any spoken replies use a reviewed synthetic voice.</p>
+<div id="messages" role="log" aria-live="polite"></div><form id="composer"><label for="question">Ask about the artwork or making process</label><textarea id="question" maxlength="1200" rows="3"></textarea><div class="actions"><button id="send">Send question</button><button type="button" id="record" hidden>Record a question</button><button type="button" id="end" class="secondary">End session</button></div></form>
+<label id="audio-choice" hidden><input type="checkbox" id="audio-consent"> Process microphone recordings with OpenAI (optional; maximum 20 seconds per recording).</label>
+</section><section id="receipt" class="card" hidden><h2>Your saved review record</h2><p>Keep the private deletion code to request removal. It is not a password for Eric’s account. It can only delete this saved session.</p><div class="actions"><button id="download-code" class="secondary">Save my deletion code</button><button id="forget" class="secondary">Delete this saved session</button></div></section>
+<p class="note">Each session is limited to five minutes and 20 questions. This is a per-session limit, not an identity check. The written exhibition remains available after the session.</p>
+</main><script type="module" src="./visitor.mjs"></script></body></html>

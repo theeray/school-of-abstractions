@@ -1,0 +1,9 @@
+node_modules/
+.env
+.env.*
+*.log
+gha-creds-*.json
+web/audio/
+exports/
+saige-private-review*.json
+Saige-private-deletion-code*.txt
